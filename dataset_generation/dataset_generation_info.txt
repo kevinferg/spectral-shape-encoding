@@ -1,0 +1,33 @@
+Files to generate datasets:
+See comments within to generate out-of-sample-set versions of each
+
+create_data_voronoi.m			Voronoi Set, compression problem
+create_data_lattice.m			Lattice Set, compression problem
+
+create_thermal_voronoi_data.m		Voronoi Set, heat problem
+create_thermal_lattice_data.m		Lattice Set, heat problem
+
+
+FEM:
+run_compression_fea.m		Runs the compression problem on an input polyshape object
+run_thermal_fea.m		Runs the thermal problem on an input polyshape object
+
+apply_compression_BCs.m		Applies the compression problem boundary conditions and sets structural properties
+apply_thermal_BCs.m		Applies the heat problem boundary conditions and sets thermal properties
+
+
+Geometry creation:
+create_porous_geometry.m	Creates a polyshape in the Voronoi Set
+create_lattice_pores.m		Creates a polyshape in the Lattice Set
+
+create_bounded_voronoi.m	Places random points in a 1x1 square and performs voronoi tessellation
+interpolate_boundary.m		Separates a boundary into a set number of segments
+smooth_boundary.m		Applies Laplacian smoothing given a boundary curve
+smooth_holes.m			Applies boundary smoothing to every hole region in a given polyshape
+
+Other:
+distance_transform.m			Gets the graph distance to an edge from every node on a given mesh
+distance_transform_euclidean.m		Gets the geodesic distance to an edge from every node on a given mesh
+
+get_edge_id.m			Gets the id for an edge in a pde model, given coordinates of a point on the edge
+convert_poly_2_geodesc.m	Converts a polyshape object to a geometry description suitable for MATLAB's pde toolbox
