@@ -1,4 +1,19 @@
-function [p,seed] = create_lattice_pores(N,N_side,degree,seed)
+function [p,seed] = create_lattice_pores(N, N_side, degree, seed)
+% create_lattice_pores - create geometry for Lattice set: polygonal pores
+% at random points on a square lattice
+%
+% INPUTS:
+% N      - number of holes
+% N_side - lattice constant, e.g. 3 for 3x3 lattice
+% degree - degree of Laplacian smoothing of each hole
+% seed   - optional seed for pore location selection
+%
+% OUTPUTS: 
+% p    - MATLAB polyshape of generated structure
+% seed - Seed used to generate hole locations
+%
+% See also create_porous_geometry
+
 warning('off','all')
 
 if ~exist('seed','var')
@@ -10,7 +25,6 @@ if ~exist('degree','var')
 end
 
 rng(seed);
-
 
 N_slots = N_side^2;
 slots = randperm(N_slots);
@@ -24,10 +38,8 @@ ybox_size = (yb(2)-yb(1))/N_side;
 get_xpos = @(s) mod(s-1,N_side)*xbox_size+xbox_size/2;
 get_ypos = @(s) floor((s-1)/N_side)*ybox_size+ybox_size/2;
 
-
 p = polyshape([xb,fliplr(xb)],repelem(yb,1,2));
 
-%figure; hold on; axis equal
 for i = 1:N
     
     xc = get_xpos(slots(i));

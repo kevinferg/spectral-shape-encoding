@@ -1,4 +1,18 @@
-function p = smooth_holes(p,delta,degree)
+function p = smooth_holes(p, delta, degree)
+% smooth_holes - Smooth every hole in a polyshape
+%
+% A hole is automatically removed (filled?) if its area ends up < 0.000625
+%
+% INPUTS:
+% p      - MATLAB polyshape whose holes should be smoothed
+% delta  - Strength of Laplacian smoothing
+% degree - Degree of Laplacian smoothing
+%
+% OUTPUTS:
+% p - polyshape with smoothed holes
+%
+% See also smooth_boundary, interpolate_boundary, polyshape
+
 if delta == 0 || degree == 0
     return
 end
