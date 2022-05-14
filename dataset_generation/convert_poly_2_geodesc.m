@@ -4,14 +4,16 @@ function [gd,sf,ns] = convert_poly_2_geodesc(poly)
 % 
 % The output format is described here:
 % https://www.mathworks.com/help/pde/ug/create-geometry-at-the-command-line.html
-% 
+% and here:
+% https://www.mathworks.com/help/pde/ug/decsg.html
+%
 % INPUTS:
 % poly - A MATLAB polyshape
 %
 % OUTPUTS:
-% gd - 
-% sf - 
-% ns - 
+% gd - "Geometry description matrix"
+% sf - "Set formula"
+% ns - "Name-space matrix"
 %
 % See also polyshape, decsg
 
