@@ -1,4 +1,3 @@
-% This function gets the edge from the mesh that contains the requested point 
 function [edge] = get_edge_id(model, x, y)
 % get_edge_id - Search edges in PDE model for one that contains a point
 % 
