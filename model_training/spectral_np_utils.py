@@ -1,6 +1,7 @@
 import numpy as np
 import scipy
 
+
 def generate_laplacian(edges,edge_weights):
     # Columns of 'edges' are ~one-directional~ pairs in the graph
     # 'edge_weights' is an array of edge weights for each one-directional pair in 'edges'
@@ -12,6 +13,7 @@ def generate_laplacian(edges,edge_weights):
         
     # Currently returns the dense matrix for simplicity:
     return L.todense()
+
 
 def norm_sym_laplacian(xy_data,sigma=1):
     # 'data' has x-coords in column 0 and y-coords in column 1
@@ -44,9 +46,34 @@ def pseudoinverse(E):
     return Einv;
 
 
-
 def get_cvec(E,field):
     Einv = pseudoinverse(E)
     field = field.reshape(-1,1)
     c = Einv @ field
     return c
+
+
+class SSE():
+    def __init__(self, n = 64, res = 16, k = 25, lb = 0, ub= 1):
+        self.res = res
+        self.ub = ub
+        self.lb = lb
+        self.n = n
+        self.k = k
+        
+        xp = np.linspace(0,1,res)
+        yp = np.linspace(0,1,res)
+        
+        self.xp, self.yp = np.meshgrid(xp, yp)
+        span = ub-lb
+        self.xi = ((xp-lb)/span*(n-1)).astype(int)
+        self.yi = ((yp-lb)/span*(n-1)).astype(int)
+        
+        self.L = norm_sym_laplacian(np.concatenate((self.xp.reshape(-1,1),self.yp.reshape(-1,1)),axis=1),1)
+        self.E, self.w = get_eigs(self.L,k)
+
+        
+    def cvec(self,sdf):
+        z = sdf[np.ix_(self.xi, self.yi)]
+        c = get_cvec(self.E, z).flatten()
+        return c
