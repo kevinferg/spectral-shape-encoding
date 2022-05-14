@@ -1,7 +1,22 @@
-% This function converts a MATLAB polygon into a CSG geometry description,
-% The link here describes MATLAB's CSG format:
-% https://www.mathworks.com/help/pde/ug/create-geometry-at-the-command-line.html
 function [gd,sf,ns] = convert_poly_2_geodesc(poly)
+% convert_poly_2_geodesc - Converts a MATLAB polyshape into a MATLAB CSG 
+% geometry description.
+% 
+% The output format is described here:
+% https://www.mathworks.com/help/pde/ug/create-geometry-at-the-command-line.html
+% and here:
+% https://www.mathworks.com/help/pde/ug/decsg.html
+%
+% INPUTS:
+% poly - A MATLAB polyshape
+%
+% OUTPUTS:
+% gd - "Geometry description matrix"
+% sf - "Set formula"
+% ns - "Name-space matrix"
+%
+% See also polyshape, decsg
+
 N = numboundaries(poly);
 ns = repmat("str",1,N);
 gd = zeros(max(numsides(poly,1:N)),N);
@@ -20,5 +35,3 @@ for i = 1:N
     end
     sf = strcat(sf,ns(i));
 end
-
-

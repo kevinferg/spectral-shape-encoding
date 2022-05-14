@@ -1,12 +1,7 @@
 Files to generate datasets:
-See comments within to generate out-of-sample-set versions of each
 
-create_data_voronoi.m			Voronoi Set, compression problem
-create_data_lattice.m			Lattice Set, compression problem
-
-create_thermal_voronoi_data.m		Voronoi Set, heat problem
-create_thermal_lattice_data.m		Lattice Set, heat problem
-
+create_all_datasets.m		Generates all datasets
+generate_matlab_dataset.m	Creates a dataset .mat file according to input specifications
 
 FEM:
 run_compression_fea.m		Runs the compression problem on an input polyshape object
@@ -26,8 +21,8 @@ smooth_boundary.m		Applies Laplacian smoothing given a boundary curve
 smooth_holes.m			Applies boundary smoothing to every hole region in a given polyshape
 
 Other:
-distance_transform.m			Gets the graph distance to an edge from every node on a given mesh
-distance_transform_euclidean.m		Gets the geodesic distance to an edge from every node on a given mesh
+export_nodes.m			Prints node info to a text file
+output_polyshape.m		Prints polyshape object info to a text file
 
 get_edge_id.m			Gets the id for an edge in a pde model, given coordinates of a point on the edge
 convert_poly_2_geodesc.m	Converts a polyshape object to a geometry description suitable for MATLAB's pde toolbox
