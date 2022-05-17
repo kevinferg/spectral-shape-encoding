@@ -1,8 +1,10 @@
 import numpy as np
+import scipy
 from scipy import io
 import torch
 
 from spectral_np_utils import *
+import random
 
 class DataPt:
     def __init__(self, x = None, y = None, sdf = None):
@@ -50,3 +52,12 @@ def load_matlab_dataset(filename, scale = 10000):
         data.y = torch.tensor(data.y) / scale
         
     return dataset
+
+
+def get_split_indices(dataset, train_fraction = 0.8, seed = 0):
+    random.seed(seed)
+    N = len(dataset)
+    idxs = random.sample(range(N),N)
+    idxs_tr = idxs[:int(train_fraction*N)]
+    idxs_val = idxs[int(train_fraction*N):]
+    return idxs_tr, idxs_val
