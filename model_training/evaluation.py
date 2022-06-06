@@ -7,6 +7,16 @@ from data_loading import *
 from pytorch_utils import *
 
 def get_r2(a,b):
+    ''' 
+    get_r2 - Computes an R-squared value to evaluate the goodness
+    of fit between two nd-arrays
+    
+    a - The ground-truth data
+    b - The predicted data
+    
+    Returns
+    - The R2 value
+    '''
     N = len(a)
     SS_tot = np.sum((b-np.mean(b))**2)
     SS_res = np.sum((a-b)**2)
@@ -14,11 +24,31 @@ def get_r2(a,b):
     return R2
 
 def adj_r2(a,b,nf=1): 
+    ''' 
+    adj_r2 - Computes an adjusted R-squared value to evaluate the goodness
+    of fit between two nd-arrays, adjusted for the number of predictors used
+    
+    a - The ground-truth data
+    b - The predicted data
+    nf - The number of features used to make the prediction in 'b'
+    
+    Returns
+    - The adjusted R2 value
+    '''
     R2 = get_r2(a, b)
     R2 = 1-(1-R2)*(N-1)/(N-nf-1)
     return R2
 
 def eval_model(model,data):
+    ''' 
+    evaluate_model - Runs a model and computes the R-squared value on a single data point
+    
+    model - The model to evaluate
+    data - the data point
+    
+    Returns
+    - The R2 value from using 'model' to predict the field in 'data'
+    '''
 
     pred = model(data).detach().numpy().flatten()
     gt = data.y.detach().numpy().flatten()
@@ -35,8 +65,6 @@ def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
     wss - Within sample set data
     idxs_tr - indices of wss in the training set
     idxs_val - indices of wss in the validation/testing set
-    oss - All data 'out of sample set'
-    
     oss - Out-of-sample set data
     
     Returns
@@ -68,6 +96,19 @@ def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
     return vals1, vals2, vals3
 
 def plot_boxes(train_evals, test_evals, oss_evals, lims = [-0.25, 1], filename = None):
+    ''' 
+    plot_boxes - Creates a box-and-whisker plot for the evaluations generated in evaluate_all_data()
+    
+    train_evals - Array of R2 values on training data
+    test_evals - Array of R2 values on test data
+    oss_evals - Array of R2 values on out-of-sample-set data
+    lims - The y-axis limits of the plot
+    filename - (Optional) The name of the file to save the plot as an image
+    
+    Returns
+    - If 'filename' argument is specified, saves an image to 'filename', otherwise displays the figure
+    
+    '''
     plt.figure(figsize=(6,3.4), dpi=175)
     plt.boxplot([train_evals, test_evals, oss_evals], positions=[1,2,3])
 
@@ -84,7 +125,24 @@ def plot_boxes(train_evals, test_evals, oss_evals, lims = [-0.25, 1], filename =
 
 
 def plot_compare(model, data, filename = None,s = 10, m = 1.8):
+    ''' 
+    plot_compare - Makes a set of plots for comparing a model's prediction on a data point with
+    the ground-truth, as per the following:
+    Subplot 1: Visualization of the predicted scalar field value at every node
+    Subplot 2: Visualization of the ground-truth scalar field value at every node
+    Subplot 3: Visualization of the absolute difference between the predicted and ground-truth fields
+    Subplot 4: Predicted-vs-actual plot for the model's predictions across all nodes
     
+    model - The model to use for prediction
+    data - The data point on which to visualize the results
+    filename - (Optional) The name of the file to save the plot as an image
+    s - The size of each node
+    m - The maximum value of the theoretical best line drawn on Subplot 4
+    
+    Returns
+    - If 'filename' argument is specified, saves an image to 'filename', otherwise displays the figure
+    
+    '''
     title_height = 0.86
     cbar_shrink = 0.9
     cbar_pad = -0.1
@@ -161,8 +219,6 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     plt.ylim([0,m])
     plt.yticks(plt.xticks()[0])
     plt.axis('square')
-
-    
 
     
     plt.tight_layout()
