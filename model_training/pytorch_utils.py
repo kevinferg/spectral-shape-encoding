@@ -3,9 +3,38 @@ import torch
 
 
 def smoothstep(a0, a1, w):
+    ''' 
+    smoothstep: Interpolates between two values/arrays/tensors
+    using cubic Hermite interpolation (smoothstep)
+    
+    a0 - Value(s)
+    a1 - Value(s)
+    w - Fraction/weight of a0 in the interpolation
+    
+    Examples:
+    w = 0   --> Returns a0
+    w = 0.5 --> Returns average of a0 and a1
+    w = 1   --> Returns a1
+    
+    Returns - The interpolated value/array/tensor  
+    '''
     return (a1 - a0) * (3.0 - w * 2.0) * w * w + a0
 
 def linstep(a0, a1, w):
+    ''' 
+    linstep: Linearly interpolates between two values/arrays/tensors
+    
+    a0 - Value(s)
+    a1 - Value(s)
+    w - Fraction/weight of a0 in the interpolation
+    
+    Examples:
+    w = 0   --> Returns a0
+    w = 0.5 --> Returns average of a0 and a1
+    w = 1   --> Returns a1
+    
+    Returns - The interpolated value/array/tensor  
+    '''
     return (a1-a0) * w + a0
 
 
