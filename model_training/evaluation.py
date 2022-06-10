@@ -8,7 +8,7 @@ from pytorch_utils import *
 
 def get_r2(a,b):
     ''' 
-    get_r2 - Computes an R-squared value to evaluate the goodness
+    get_r2: Computes an R-squared value to evaluate the goodness
     of fit between two nd-arrays
     
     a - The ground-truth data
@@ -25,7 +25,7 @@ def get_r2(a,b):
 
 def adj_r2(a,b,nf=1): 
     ''' 
-    adj_r2 - Computes an adjusted R-squared value to evaluate the goodness
+    adj_r2: Computes an adjusted R-squared value to evaluate the goodness
     of fit between two nd-arrays, adjusted for the number of predictors used
     
     a - The ground-truth data
@@ -41,7 +41,7 @@ def adj_r2(a,b,nf=1):
 
 def eval_model(model,data):
     ''' 
-    evaluate_model - Runs a model and computes the R-squared value on a single data point
+    evaluate_model: Runs a model and computes the R-squared value on a single data point
     
     model - The model to evaluate
     data - the data point
@@ -55,10 +55,9 @@ def eval_model(model,data):
 
     return get_r2(pred, gt)
 
-
 def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
     ''' 
-    evaluate_all_data - Runs a model and computes the R-squared value on every point in the
+    evaluate_all_data: Runs a model and computes the R-squared value on every point in the
     training, testing, and out-of-sample sets
     
     model - The model to evaluate
@@ -71,7 +70,6 @@ def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
     - Array of R2 values on training data
     - Array of R2 values on testing data
     - Array of R2 values on out-of-sample-set data
-    
     '''
     
     vals = []
@@ -97,7 +95,7 @@ def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
 
 def plot_boxes(train_evals, test_evals, oss_evals, lims = [-0.25, 1], filename = None):
     ''' 
-    plot_boxes - Creates a box-and-whisker plot for the evaluations generated in evaluate_all_data()
+    plot_boxes: Creates a box-and-whisker plot for the evaluations generated in evaluate_all_data()
     
     train_evals - Array of R2 values on training data
     test_evals - Array of R2 values on test data
@@ -107,7 +105,6 @@ def plot_boxes(train_evals, test_evals, oss_evals, lims = [-0.25, 1], filename =
     
     Returns
     - If 'filename' argument is specified, saves an image to 'filename', otherwise displays the figure
-    
     '''
     plt.figure(figsize=(6,3.4), dpi=175)
     plt.boxplot([train_evals, test_evals, oss_evals], positions=[1,2,3])
@@ -123,10 +120,9 @@ def plot_boxes(train_evals, test_evals, oss_evals, lims = [-0.25, 1], filename =
     else:
         plt.show()
 
-
 def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     ''' 
-    plot_compare - Makes a set of plots for comparing a model's prediction on a data point with
+    plot_compare: Makes a set of plots for comparing a model's prediction on a data point with
     the ground-truth, as per the following:
     Subplot 1: Visualization of the predicted scalar field value at every node
     Subplot 2: Visualization of the ground-truth scalar field value at every node
@@ -143,6 +139,8 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     - If 'filename' argument is specified, saves an image to 'filename', otherwise displays the figure
     
     '''
+    
+    plt.figure(figsize=(12,4),dpi=180)
     title_height = 0.86
     cbar_shrink = 0.9
     cbar_pad = -0.1
@@ -151,6 +149,8 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     x = data.x[:,0].detach().numpy()
     y = data.x[:,1].detach().numpy()
     pred = model(data)
+    pred = pred.detach().numpy().flatten()
+    gt = data.y.detach().numpy().flatten()
     
     l1 = 0
     l2 = ((torch.max(pred)+0)/2).item()
@@ -160,13 +160,11 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     l12 = ((torch.max(data.y)+0)/2).item()
     l13 = torch.max(data.y).item()
     
-    
-    pred = pred.detach().numpy().flatten()
-    gt = data.y.detach().numpy().flatten()
+    tick0 = 0
+    tick2 = np.round(np.max(np.abs(pred-gt)),3)
+    tick1 = (tick0 + tick2)/2
 
-    plt.figure(figsize=(12,4),dpi=180)
-    
-    ###
+    ### Subplot 1 - Prediction:
     
     plt.subplot(1,4,1)
     plt.scatter(x, y, c=pred,s=s,cmap='jet',vmin = 0)
@@ -178,7 +176,7 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     bar1 = plt.colorbar(shrink=cbar_shrink,location='bottom',pad=cbar_pad,ticks=[0,l2,l3])
     bar1.ax.set_xticklabels([0,np.round(l2,3),np.round(l3,3)])
 
-    ###
+    ### Subplot 2 - Ground Truth:
     
     plt.subplot(1,4,2)
     plt.scatter(x, y, c=gt,s=s,cmap='jet',vmin = 0)
@@ -190,24 +188,19 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     bar2 = plt.colorbar(shrink=cbar_shrink,location='bottom',pad=cbar_pad,ticks=[l11,l12,l13])
     bar2.ax.set_xticklabels([round(l11,3),np.round(l12,3),np.round(l13,3)])
     
-    ###
+    ### Subplot 3 - Error:
 
-    tick0 = 0
-    tick2 = np.round(np.max(np.abs(pred-gt)),3)
-    tick1 = (tick0 + tick2)/2
-    
     ax = plt.subplot(1,4,3)
     plt.scatter(x, y, c=np.abs(pred - gt),s=s,cmap='jet',vmin = 0,vmax=tick2)
     plt.title('Absolute Difference',y=title_height)
     plt.axis('equal')
     plt.axis('off')
-    
     plt.set_cmap('jet')
 
     bar3 = plt.colorbar(shrink=cbar_shrink,location='bottom',pad=cbar_pad,ticks=[tick0, tick1, tick2])
     bar3.ax.set_xticklabels([tick0, tick1, tick2])
 
-    ###
+    ### Subplot 4 - R Squared:
     
     ax = plt.subplot(1,4,4)
     plt.scatter(gt,pred,c='b')
@@ -219,7 +212,8 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     plt.ylim([0,m])
     plt.yticks(plt.xticks()[0])
     plt.axis('square')
-
+    
+    ###
     
     plt.tight_layout()
     plt.subplots_adjust(left=None, bottom=None, right=None, top=None, wspace=0.15, hspace=None)
