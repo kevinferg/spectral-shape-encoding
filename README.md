@@ -29,7 +29,7 @@ Feel free to use the following BibTeX citation:
 ### Usage
 
 #### Dataset generation
-Dataset generation is done in MATLAB using the PDE Toolbox. See [dataset_generation/dataset_generation_info.txt](dataset_generation/dataset_generation_info.txt) for details on generating data. 
+Dataset generation is done in MATLAB using the PDE Toolbox. See [dataset_generation/](dataset_generation/README.md) for details on generating data. 
 
 
 The datasets also can be downloaded from this [Google Drive link](https://drive.google.com/file/d/1mbKgWmByB4Pt6X2SUlHAnIpUouMwO_ld/view?usp=sharing).

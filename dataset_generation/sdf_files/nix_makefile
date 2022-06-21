@@ -1,10 +1,10 @@
 # Makefile
-# make
-# make clean
-# make bin/main.exe
-# ... on Windows using mingw: 'mingw32-make' instead of 'make'
 
-# Directory names (TSTDIR & BINDIR are also subdirectories of INCDIR)
+# Usage:
+# make         --> Builds executable in the bin/ directory
+# make clean   --> Removes executable and object files
+
+# Directory names
 OBJDIR = obj
 INCDIR = include
 SRCDIR = src
@@ -12,16 +12,14 @@ BINDIR = bin
 
 # Final executable names (& corresponding sources)
 MAIN = calc_sdf
-
-# For Windows:
-EXE = .exe
+EXE = 
 VPATH = $(SRCDIR):$(OBJDIR)
 
-# Change 'del' to 'rm' on non-Windows systems:
-RM = del
+# Change 'rm' to 'del' on Windows systems:
+RM = rm
 CC = gcc
 INC_LOCATIONS = $(INCDIR)
-INC_FLAGS = $(addprefix -I,$(INC_LOCATIONS))
+INC_FLAGS = $(addprefix -I,$(INC_LOCATIONS)) -lm
 CFLAGS =  $(INC_FLAGS) -MMD -MP
 
 srcs = $(notdir $(wildcard $(SRCDIR)/*.c))
@@ -36,18 +34,17 @@ src_objs = $(addprefix $(OBJDIR)/,$(srcs:.c=.o))
 all: $(BINDIR)/$(MAIN)$(EXE)
 
 $(BINDIR)/$(MAIN)$(EXE): $(src_objs) | silent
-	$(CC) $^ -o $@ -s
+	$(CC) $^ -o $@ -s $(CFLAGS)
 
 
 $(OBJDIR)/%.o: %.c
-	$(CC) $(CFLAGS) -c $^ -o $@
+	$(CC) -c $^ -o $@ $(CFLAGS)
 
 .PHONY: clean all
 
 silent:
 	@:
 
-# Change \\ to / on non-Windows systems:
+# Change / to \\ on Windows systems:
 clean:
-	$(RM) /Q $(OBJDIR)\\* $(BINDIR)\\*
-
+	$(RM) -rf $(OBJDIR)/* $(BINDIR)/*
