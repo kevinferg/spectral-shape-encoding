@@ -1,0 +1,50 @@
+# Makefile
+
+# Usage:
+# make         --> Builds executable in the bin/ directory
+# make clean   --> Removes executable and object files
+
+# Directory names
+OBJDIR = obj
+INCDIR = include
+SRCDIR = src
+BINDIR = bin
+
+# Final executable names (& corresponding sources)
+MAIN = calc_sdf
+EXE = 
+VPATH = $(SRCDIR):$(OBJDIR)
+
+# Change 'rm' to 'del' on Windows systems:
+RM = rm
+CC = gcc
+INC_LOCATIONS = $(INCDIR)
+INC_FLAGS = $(addprefix -I,$(INC_LOCATIONS)) -lm
+CFLAGS =  $(INC_FLAGS) -MMD -MP
+
+srcs = $(notdir $(wildcard $(SRCDIR)/*.c))
+
+deps = $(srcs:.c=.d) $(tsts:.c=.d)
+
+src_objs = $(addprefix $(OBJDIR)/,$(srcs:.c=.o))
+
+
+-include $(deps)
+
+all: $(BINDIR)/$(MAIN)$(EXE)
+
+$(BINDIR)/$(MAIN)$(EXE): $(src_objs) | silent
+	$(CC) $^ -o $@ -s $(CFLAGS)
+
+
+$(OBJDIR)/%.o: %.c
+	$(CC) -c $^ -o $@ $(CFLAGS)
+
+.PHONY: clean all
+
+silent:
+	@:
+
+# Change / to \\ on Windows systems:
+clean:
+	$(RM) -rf $(OBJDIR)/* $(BINDIR)/*
