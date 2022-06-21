@@ -1,10 +1,10 @@
 # Makefile
-# make
-# make clean
-# make bin/main.exe
-# ... on Windows using mingw: 'mingw32-make' instead of 'make'
 
-# Directory names (TSTDIR & BINDIR are also subdirectories of INCDIR)
+# Usage (for Windows using MinGW):
+# mingw32-make         --> Builds executable in the bin/ directory
+# mingw32-make clean   --> Removes executable and object files
+
+# Directory names
 OBJDIR = obj
 INCDIR = include
 SRCDIR = src
