@@ -6,7 +6,7 @@ import torch
 from data_loading import *
 from pytorch_utils import *
 
-def get_r2(a,b):
+def get_r2(a, b):
     ''' 
     get_r2: Computes an R-squared value to evaluate the goodness
     of fit between two nd-arrays
@@ -23,7 +23,7 @@ def get_r2(a,b):
     R2 = 1-SS_res/SS_tot
     return R2
 
-def adj_r2(a,b,nf=1): 
+def adj_r2(a, b, nf=1): 
     ''' 
     adj_r2: Computes an adjusted R-squared value to evaluate the goodness
     of fit between two nd-arrays, adjusted for the number of predictors used
@@ -39,7 +39,7 @@ def adj_r2(a,b,nf=1):
     R2 = 1-(1-R2)*(N-1)/(N-nf-1)
     return R2
 
-def eval_model(model,data):
+def eval_model(model, data):
     ''' 
     evaluate_model: Runs a model and computes the R-squared value on a single data point
     
@@ -53,7 +53,7 @@ def eval_model(model,data):
     pred = model(data).detach().numpy().flatten()
     gt = data.y.detach().numpy().flatten()
 
-    return get_r2(pred, gt)
+    return get_r2(gt, pred)
 
 def evaluate_all_data(model, wss, idxs_tr, idxs_val, oss):
     ''' 
@@ -140,7 +140,7 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     
     '''
     
-    plt.figure(figsize=(12,4),dpi=180)
+    plt.figure(figsize=(12,4), dpi=180)
     title_height = 0.86
     cbar_shrink = 0.9
     cbar_pad = -0.1
@@ -149,8 +149,6 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     x = data.x[:,0].detach().numpy()
     y = data.x[:,1].detach().numpy()
     pred = model(data)
-    pred = pred.detach().numpy().flatten()
-    gt = data.y.detach().numpy().flatten()
     
     l1 = 0
     l2 = ((torch.max(pred)+0)/2).item()
@@ -159,6 +157,9 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     l11 = 0
     l12 = ((torch.max(data.y)+0)/2).item()
     l13 = torch.max(data.y).item()
+    
+    pred = pred.detach().numpy().flatten()
+    gt = data.y.detach().numpy().flatten()
     
     tick0 = 0
     tick2 = np.round(np.max(np.abs(pred-gt)),3)
@@ -207,7 +208,7 @@ def plot_compare(model, data, filename = None,s = 10, m = 1.8):
     plt.plot([0,m],[0,m],'r-')
     plt.xlabel('Ground Truth')
     plt.ylabel('Prediction')
-    plt.title(f"R2: {np.round(get_r2(pred, gt),3)}")
+    plt.title(f"R2: {np.round(get_r2(gt, pred),3)}")
     plt.xlim([0,m])
     plt.ylim([0,m])
     plt.yticks(plt.xticks()[0])
