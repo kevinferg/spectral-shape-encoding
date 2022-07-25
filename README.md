@@ -35,7 +35,7 @@ Dataset generation is done in MATLAB using the PDE Toolbox. See [dataset_generat
 The datasets also can be downloaded from this [Google Drive link](https://drive.google.com/file/d/1mbKgWmByB4Pt6X2SUlHAnIpUouMwO_ld/view?usp=sharing).
 
 #### Model training
-The model is implemented in Pytorch. [This notebook](model_training/train_models.ipynb) steps through the process of loading datasets, creating models, and evaluating model performance. Model results can be visualized with the `plot_compare()` function in [model_training/evaluate.py](model_training/evaluate.py):
+The model is implemented in Pytorch. [This notebook](model_training/train_single_model.ipynb) steps through the process of loading a dataset, training a model, and evaluating model performance, for a single dataset. [This one](model_training/train_models.ipynb) trains models on all datasets. Model results can be visualized with the `plot_compare()` function in [model_training/evaluate.py](model_training/evaluate.py):
 
 ![Example_visualization](figures/stress_visualization.png)
 
