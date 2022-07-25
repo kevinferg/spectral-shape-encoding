@@ -1,0 +1,3 @@
+*makefile* linguist-language=Makefile
+*.h linguist-language=C
+*.ipynb linguist-documentation
