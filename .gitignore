@@ -133,3 +133,12 @@ dmypy.json
 
 # Pytorch Models
 *.pth
+
+# C prerequisites and object files
+*.d
+*.o
+
+# SDF generator executables
+*calc_sdf*
+
+
