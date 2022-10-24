@@ -5,13 +5,13 @@ To generate the shape datasets, first a separate executable that computes a sign
 #### Windows
 1. Install MinGW, in particular gcc and mingw32-make
 2. Navigate to `dataset_generation/sdf_files/` in a terminal
-3. Run `mingw32-make win_makefile`
+3. Run `mingw32-make -f win_makefile`
 4. Copy the file `dataset_generation/sdf_files/bin/calc_sdf.exe` to `dataset_generation/`
 
 #### \*nix
 1. Ensure gcc and make are installed.
 2. Navigate to `dataset_generation/sdf_files/` in a terminal
-3. Run `make nix_makefile`
+3. Run `make -f nix_makefile`
 4. Run `cp bin/calc_sdf ../`
 
 ### Generating MATLAB datasets
