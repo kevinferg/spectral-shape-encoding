@@ -1,4 +1,3 @@
-import numpy as np
 import torch
 
 
@@ -54,7 +53,7 @@ def tensor_interp2d(grid, pts, epsilon = 1e-9):
     
     pts = pts.view(-1,2)
     pts = pts.clip(min = torch.tensor(epsilon), max = torch.tensor(1 - epsilon))
-    size = np.shape(grid)
+    size = grid.shape
     grid = torch.transpose(grid,1,2)
     if 2 == len(size):
         grid = grid[None,:,:]
@@ -62,16 +61,9 @@ def tensor_interp2d(grid, pts, epsilon = 1e-9):
     
     x, y = ((pts[:,0])*(columns-1)), ((pts[:,1])*(rows-1))
     
-    x_f, x_i = np.modf(x)
-    y_f, y_i = np.modf(y)
-    
-    x_f = x_f.view(1,-1)
-    y_f = y_f.view(1,-1)
-    x_i = x_i.long()
-    y_i = y_i.long()
+    x_f, x_i = torch.frac(x).view(1,-1), torch.floor(x).long()
+    y_f, y_i = torch.frac(y).view(1,-1), torch.floor(y).long()
 
-    
-    
     bottom = smoothstep(grid[:, x_i, y_i],     grid[:, x_i + 1, y_i],     x_f)
     top    = smoothstep(grid[:, x_i, y_i + 1], grid[:, x_i + 1, y_i + 1], x_f)
     
