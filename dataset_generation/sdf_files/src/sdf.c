@@ -14,7 +14,6 @@ double get_distance_to_Boundary(Point* P, Boundary* boundary);
 
 Point* read_point_file(char* filename, int* num_points);
 
-
 int compute_sdf(char* filein, char* fileout, double xymin, double xymax, int res) {
 	Shape*  shape = read_Shape(filein);
 	if (shape == NULL) {
@@ -22,7 +21,7 @@ int compute_sdf(char* filein, char* fileout, double xymin, double xymax, int res
 		return -1;
 	}
 	
-	if (xymin > xymax || res <= 0) {
+	if (xymin > xymax || res <= 1) {
 		fprintf(stderr, "Bad dimensions requested\n");
 		return -1;
 	}
@@ -38,9 +37,9 @@ int compute_sdf(char* filein, char* fileout, double xymin, double xymax, int res
 		return -1;
 	}
 		
-	
-	for (ix = 0; ix < res; ix++) {
-		for (iy = 0; iy < res; iy++) {
+	res--; // e.g. For res = 64, dx = dy = (max-min)/(res-1) 
+	for (ix = 0; ix <= res; ix++) {
+		for (iy = 0; iy <= res; iy++) {
 			p.x = ((double) ix / (double) res) * (xymax - xymin) + xymin;
 			p.y = ((double) iy / (double) res) * (xymax - xymin) + xymin;
 			
@@ -53,13 +52,8 @@ int compute_sdf(char* filein, char* fileout, double xymin, double xymax, int res
 	fclose(f);
 	destroy_Shape(shape);
 	
-	//printf("Success\n");
-	
 	return 0;
 }
-
-
-
 
 int compute_sdf_points(char* bound_file, char* point_file, char* out_file) {
 	int i, num_points;
@@ -89,9 +83,7 @@ int compute_sdf_points(char* bound_file, char* point_file, char* out_file) {
 	fclose(f);
 	destroy_Shape(shape);
 	free(points);
-	
-	//printf("Success\n");
-	
+
 	return 0;
 
 }
