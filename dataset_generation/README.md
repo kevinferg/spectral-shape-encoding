@@ -58,5 +58,6 @@ To make a dataset with specific parameters, use `generate_matlab_dataset.m`.
 | --- | --- |
 | [`export_nodes.m`](export_nodes.m) | Prints node info to a text file | 
 | [`output_polyshape.m`](output_polyshape.m) | Prints polyshape object info to a text file |
+| [`polySDF.m`](polySDF.m) | Computes the signed distance field (SDF) for a polyshape at input query points |
 | [`get_edge_id.m`](get_edge_id.m) | Gets the id for an edge in a pde model, given coordinates of a point on the edge |
 | [`convert_poly_2_geodesc.m`](convert_poly_2_geodesc.m) | Converts a polyshape object to a geometry description suitable for MATLAB's pde toolbox |
