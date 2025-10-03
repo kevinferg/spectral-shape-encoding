@@ -1,5 +1,8 @@
 ## How to generate datasets
-To generate the shape datasets, first a separate executable that computes a signed distance field (SDF) must be compiled. Then, a MATLAB script generates all datasets as .mat files.
+To generate the shape datasets, first a separate executable that computes a signed distance field (SDF) must be compiled. Then, a MATLAB script generates all datasets as .mat files.  
+
+**UPDATE:** Now the SDF is computed directly in MATLAB. The compilation instructions below are not needed.
+
 
 ### Compiling SDF executable
 #### Windows

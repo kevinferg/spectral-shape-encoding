@@ -87,6 +87,9 @@ sdf = cell(s,1);
 
 rng(0);
 
+v = linspace(0, 1, 64);
+sdf_grid_points = meshgrid(v, v);
+
 index = 0;
 bar = waitbar(0,"Progress:   0.00%");
 for j = 1:repeats
@@ -119,7 +122,8 @@ for j = 1:repeats
                 elseif field == "temperature"
                     [~,results] = run_thermal_fea(p, res);
                 else
-                    fprintf("Unrecognized field name: Use ""stress"" or ""temperature""\n");
+                    fprintf("Unrecognized field name: " ...
+                    "Use ""stress"" or ""temperature""\n");
                     close(bar);
                     return;
                 end
@@ -129,15 +133,17 @@ for j = 1:repeats
                 no_geometry = no_geometry + 1;
                 
                 if no_geometry > 10
-                    fprintf("Geometry creation or FEA failed 10 times consecutively. Something needs to be fixed.\n");
+                    fprintf("Geometry creation or FEA failed 10 times " ...
+                            "consecutively. Something needs to be fixed.\n");
                     close(bar);
                     return;
                 end
             end
         end
         
-        % Input all data into cells
-        % Currently requires temporary text file i/o and system calls to use SDF generation
+        % Input all data into cells...
+        % (No longer requires temporary text file i/o and 
+        %  system calls to use SDF generation)
 
         nodes{index} = results.Mesh.Nodes;
         elem{index} = int64(results.Mesh.Elements);
@@ -148,14 +154,18 @@ for j = 1:repeats
             stress{index} = results.Temperature;
         end
 
-        output_polyshape(p,"bound.txt");
-        export_nodes(results.Mesh.Nodes,"point.txt");
-        system("calc_sdf bound.txt point.txt out.txt");
-        B = readmatrix("out.txt");
-        system("calc_sdf bound.txt out.txt");
-        A = readmatrix("out.txt");
-        sdf{index} = A;
-        dt{index} = B;
+        % output_polyshape(p,"bound.txt");
+        % export_nodes(results.Mesh.Nodes,"point.txt");
+        % system("calc_sdf bound.txt point.txt out.txt");
+        % B = readmatrix("out.txt");
+        % system("calc_sdf bound.txt out.txt");
+        % A = readmatrix("out.txt");
+
+        A = polySDF(p, sdf_grid_points);
+        B = polySDF(p, results.Mesh.Nodes);
+
+        sdf{index} = A;  % SDF on 64x64 grid
+        dt{index} = B;   % SDF at mesh nodes
         
         progress = index/(repeats*rows);
         waitbar(progress,bar,sprintf("Progress: %6.2f%%",progress*100));
