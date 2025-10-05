@@ -1,5 +1,6 @@
 function sdf = polySDF(polyin, varargin)
-% polySDF - calculates the signed distance function (SDF) for a polyshape.
+% polySDF - calculates the signed distance function (SDF) for a polyshape
+%           at a set of input query points
 %
 % Usage:
 %   sdf = polySDF(polyin, P)
@@ -59,47 +60,46 @@ end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 
-%%%-------------------------------------------------------------%%%
-%%%                   Get overall edge info                     %%%
-%%%-------------------------------------------------------------%%%
+%%%-----------------------------------------------------%%%
+%%%               Get overall edge info                 %%%
+%%%-----------------------------------------------------%%%
 V = polyin.Vertices(~any(isnan(polyin.Vertices), 2), :);
 nP = size(P,1);
 nV = size(V,1);
-[edges, is_hole_edge, is_ccw] = get_polyshape_edge_info(polyin);
-%%%-------------------------------------------------------------%%%
+[edges, hole_sign, loop_sign, edge_sign] = ...
+    get_polyshape_edge_info(polyin);
+%%%-----------------------------------------------------%%%
 
 
 %%%---------------------------------------------------%%%
 %%%          Compute all pairwise distances           %%%
 %%%---------------------------------------------------%%%
 diffs = reshape(P, nP, 1, 2) - reshape(V, 1, nV, 2);
-v1_to_p = diffs(:,edges(:,1),:);
-v1_to_v2 = V(edges(:,2),:) - V(edges(:,1),:);
+d_sq_vertex = dot(diffs, diffs, 3);  % Query-to-vertex
 
+v1_to_v2 = V(edges(:,2),:) - V(edges(:,1),:);
 edge_len_sq = dot(v1_to_v2, v1_to_v2, 2)';
-edge_len_sq(edge_len_sq == 0) = 1e-9;
+edge_len_sq(edge_len_sq == 0) = 1e-9; % Along edges
 %%%---------------------------------------------------%%%
 
 
 %%%-----------------------------------------------------------%%%
 %%%    Dist. b/w query pts and edge segments OR endpoints     %%%
 %%%-----------------------------------------------------------%%%
+v1_to_p = diffs(:,edges(:,1),:);
 numerator = sum(v1_to_p .* reshape(v1_to_v2, 1, [], 2), 3);
 frac = numerator ./ edge_len_sq;
-
-use_v1 = (frac <= 0);
-use_v2 = (frac >= 1);
+use_v1  = (frac <= 0);
+use_v2  = (frac >= 1);
 between = (frac > 0) & (frac < 1);
 
-d_sq_v1 = dot(v1_to_p, v1_to_p, 3);
-v2_to_p = v1_to_p - reshape(v1_to_v2, 1, [], 2);
-d_sq_v2 = dot(v2_to_p, v2_to_p, 3);
+d_sq_v1 = d_sq_vertex(:, edges(:,1));
+d_sq_v2 = d_sq_vertex(:, edges(:,2));
 d_sq_between = d_sq_v1 - (frac.^2 .* edge_len_sq);
 
-d_sq_all = zeros(size(frac));
-d_sq_all(use_v1) = d_sq_v1(use_v1);
-d_sq_all(use_v2) = d_sq_v2(use_v2);
-d_sq_all(between) = d_sq_between(between);
+d_sq_all = use_v1  .* d_sq_v1 + ...
+           use_v2  .* d_sq_v2 + ...
+           between .* d_sq_between;
 %%%-----------------------------------------------------------%%%
 
 
@@ -108,25 +108,33 @@ d_sq_all(between) = d_sq_between(between);
 %%%-----------------------------------------------%%%
 [sdf_sq, sdf_edge_idx] = min(d_sq_all, [], 2);
 sdf = sqrt(sdf_sq);
+
+[N, R, ~] = size(v1_to_p);
+rows = (1:N)';
+min_idx_1d = sub2ind([N, R], rows, sdf_edge_idx);
+use_v1  = use_v1(min_idx_1d);
+use_v2  = use_v2(min_idx_1d);
+between = between(min_idx_1d);
 %%%-----------------------------------------------%%%
 
 
-%%%------------------------------------------------------------%%%
-%%%    Determine sign based on whether points are interior     %%%
-%%%------------------------------------------------------------%%%
-[N, R, ~] = size(v1_to_p);
-rows = (1:N)';
-idx_page1 = sub2ind([N, R], rows, sdf_edge_idx);
-idx_page2 = idx_page1 + N * R;
-vp1 = [v1_to_p(idx_page1), v1_to_p(idx_page2)];
+%%%-------------------------------------------------------------%%%
+%%%      Determine sign based on whether points are inside      %%%
+%%%-------------------------------------------------------------%%%
+sdf_sign = zeros(size(sdf)); 
+
+vp1 = [v1_to_p(min_idx_1d), v1_to_p(min_idx_1d + R*N)];
 v12 = v1_to_v2(sdf_edge_idx, :);
-sdf_sign = sign(vp1(:,1) .* v12(:,2) - vp1(:,2) .* v12(:,1));
-hole_edge_sign = is_hole_edge(sdf_edge_idx)*-2 + 1;
-ccw_sign = is_ccw(sdf_edge_idx)*2 - 1;
-sdf_sign = sdf_sign .* hole_edge_sign .* ccw_sign;
+sdf_sign(between) = sign(vp1(between,1) .* v12(between,2) - ...
+                         vp1(between,2) .* v12(between,1));
+sdf_sign(use_v1)  = edge_sign(sdf_edge_idx(use_v1));
+sdf_sign(use_v2)  = edge_sign(edges(sdf_edge_idx(use_v2), 2));
+
+sdf_sign = sdf_sign .* loop_sign(sdf_edge_idx) ...
+                    .* hole_sign(sdf_edge_idx);
 sdf_sign(sdf_sign == 0) = 1; % Exactly along edge --> positive
 sdf = sdf .* sdf_sign;
-%%%------------------------------------------------------------%%%
+%%%-------------------------------------------------------------%%%
 
 
 %%%-----------------------------------%%%
@@ -150,32 +158,52 @@ end
 
 
 
-%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-%%% Edge characterization function %%%
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+%%% Polygon edge characterization function %%%
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-function [edges, is_hole, is_ccw] = get_polyshape_edge_info(polyin)
+function [edges, hole_sign, loop_sign, edge_sign] = ...
+         get_polyshape_edge_info(polyin)
+    %       ___________________________________________________       %
+    %______/  Get region info and handle empty polyshape case  \______%
     [vc, is_hole_region, is_ccw_region] = get_region_properties(polyin);
     if isempty(vc)
         edges = uint32.empty(0,2);
-        is_hole = logical.empty(0,1);
-        is_ccw = logical.empty(0,1);
+        hole_sign = double.empty(0,1);
+        loop_sign = double.empty(0,1);
+        edge_sign = double.empty(0,1);
         return;
     end
+    %       ___________________________________________________       %
+    %______/ Get edge index information, handling region loops \______%
+    V = polyin.Vertices(~any(isnan(polyin.Vertices), 2), :);
+    num_verts = size(V, 1);
     
     ends = cumsum(vc);
     starts = [1; ends(1:end-1)+1];
-    edge_cells = arrayfun(@(s, e) [(s:e)', circshift((s:e)',-1)], ...
-        starts, ends, 'UniformOutput', false);
+    v_indices = (1:num_verts)';
     
-    is_hole_cells = arrayfun(@(count, is_h) repmat(is_h, count, 1), ...
-        vc, is_hole_region, 'UniformOutput', false);
+    v_next_indices = circshift(v_indices, -1);
+    v_next_indices(ends) = starts;
     
-    is_ccw_cells = arrayfun(@(count, is_c) repmat(is_c, count, 1), ...
-        vc, is_ccw_region, 'UniformOutput', false);
-    
-    edges = uint32(vertcat(edge_cells{:})); % Indices of edge vertices
-    is_hole = vertcat(is_hole_cells{:});    % Whether edges border holes
-    is_ccw = vertcat(is_ccw_cells{:});      % Whether edges loop CCW
+    v_prev_indices = circshift(v_indices, 1);
+    v_prev_indices(starts) = ends;
+
+    edges = uint32([v_indices, v_next_indices]);
+    %        _______________________________        %
+    %_______/ Expand per-region to per-edge \_______%
+    repeater = zeros(num_verts, 1);
+    repeater(starts) = 1;
+    region_idx = cumsum(repeater);
+    hole_sign = 1 - 2*is_hole_region(region_idx);
+    loop_sign = 2*is_ccw_region(region_idx) - 1;
+    %        ______________________________________________        %
+    %_______/ Edge sign: turning direction of first vertex \_______%
+    vec_in = V - V(v_prev_indices, :);
+    vec_out = V(v_next_indices, :) - V;
+    crossprod = vec_in(:,1) .* vec_out(:,2) - ...
+                vec_in(:,2) .* vec_out(:,1);
+    edge_sign = sign(crossprod);
+    edge_sign(~any(vec_in, 2) | ~any(vec_out, 2)) = 0;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
@@ -217,8 +245,8 @@ function isCCW = is_counter_clockwise(V)
         isCCW = false;
         return;
     end
-    signed_area = 0.5 * sum(V(:,1).*circshift(V(:,2), -1) - ...
-                                    circshift(V(:,1), -1).*V(:,2));
+    signed_area = 0.5 * sum(V(:,1) .* circshift(V(:,2), -1) - ...
+                            circshift(V(:,1), -1) .* V(:,2));
     isCCW = signed_area > 0;
 end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
