@@ -17,10 +17,6 @@ function [] = generate_matlab_dataset(geometry, field, oss, filename, res)
 % 'dt'     - SDF values at each node
 % 'sdf'    - 64x64 matrix of SDF values across unit square
 % 
-% SIDE EFFECTS AND REQUIREMENTS:
-% Communicates with SDF generator program 'calc_sdf' using temporary text
-% files "bound.txt", "point.txt", and "out.txt"
-% 
 % See also run_compression_fea, run_thermal_fea
 
 
